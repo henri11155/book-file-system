@@ -36,7 +36,7 @@ class fileSystem {
     private:
     book* books { nullptr };
     maxSize capacity{};
-    maxSize count{0};
+    maxSize count{};
     public:
     enum direction {
         forwards = 1,
@@ -44,11 +44,6 @@ class fileSystem {
     };
     fileSystem(size_t count=8) : books{new book[capacity]}, capacity{static_cast<maxSize>(count)}, count{0} {}
 
-    //fileSystem(fileSystem&& fileSystem) noexcept : books{fileSystem.books}, capacity{fileSystem.capacity}, count{fileSystem.count}
-    //{
-    //    fileSystem.books = nullptr;
-    //    fileSystem.count = 0;
-    //}
     void resize() {
         std::cout << "resizing ";
         capacity = (capacity == 0 ? 1 : capacity * 2);
@@ -82,7 +77,6 @@ class fileSystem {
                     fast++;
                     continue;
                 } else if (!books[slow].id) {
-                    std::cout << " moving " << books[fast].id << " to " << books[slow].id;
                     books[slow] = std::move(books[fast]);
                     slow++;
                     break;
@@ -93,14 +87,10 @@ class fileSystem {
         else {
             fast = count-2; //start from first and second last elements
             slow = count-1;
-            //std::cout << fast << slow;
             while (fast >= start) {
-                //std::cout << "here";
                 if (!books[fast].id) {
-                    //std::cout << "thjeree";
                     continue;
                 } else if (!books[slow].id) {
-                    //std::cout << " moving " << books[fast].id << " to " << books[slow].id;
                     books[slow] = std::move(books[fast]);
                     slow--;
                     break;
@@ -111,18 +101,14 @@ class fileSystem {
         }
     }
     //book search(uint16_t id) {}
-    
+    //fileSystem importFromFile(std::string_view fileName) {}
     void save() {}
 
     void printBooks() {
-        //std::cout << "pritning";
         for (size_t i {0}; i < capacity; i++) {
-            //if (books[i].id){
-            std::cout << books[i].id << " " << books[i].name << " ";
-            //}
+            std::cout << books[i].id;
         }
     }
     };
-//fileSystem importFromFile(std::string_view fileName) {}
 
 #endif
