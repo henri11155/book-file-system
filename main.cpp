@@ -5,6 +5,10 @@
 
 // a program that tracks items with add/remove/search
 // store books as as struct
+enum direction {
+        backwards = 0,
+        forwards = 1
+};
 
 
 int main() {
@@ -17,7 +21,8 @@ int main() {
     test1.add(harrypotter2);
     test1.add(harrypotter3);
     test1.printBooks();
-    test1.shift(fileSystem::direction::backwards, 1);
+    test1.shift(direction::backwards, 1);
     test1.printBooks();
+    test1.save();
     //test1.resize();
 }

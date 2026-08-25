@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <random>
+#include <fstream>
 #include "filesystem.h"
 using maxSize = uint16_t;
 
@@ -13,14 +14,12 @@ struct book {
     book() = default;
     book(std::string name, std::string author, maxSize id) : name{name}, author{author}, id{id} {}
     book& operator=(book& book) noexcept {
-        std::cout << " copying ";
         name = book.name;
         author = book.author;
         id = book.id;
         return *this;
 };
     book& operator=(book&& book) noexcept {
-        std::cout << " moving ";
         name = book.name;
         author = book.author;
         id = book.id;
@@ -38,10 +37,6 @@ class fileSystem {
     maxSize capacity{};
     maxSize count{};
     public:
-    enum direction {
-        forwards = 1,
-        backwards = 0
-    };
     fileSystem(size_t count=8) : books{new book[capacity]}, capacity{static_cast<maxSize>(count)}, count{0} {}
 
     void resize() {
@@ -65,10 +60,10 @@ class fileSystem {
     
     void remove(maxSize id) {} // shift after removal
     
-    void shift (direction dir, size_t start) noexcept {
+    void shift (bool forwards, size_t start) noexcept {
         size_t fast {};
         size_t slow {};
-        if (dir == forwards) {
+        if (forwards) {
             fast = start;
             slow = start;
             fast++;
@@ -101,8 +96,22 @@ class fileSystem {
         }
     }
     //book search(uint16_t id) {}
-    //fileSystem importFromFile(std::string_view fileName) {}
-    void save() {}
+    
+    void importFromFile(std::string_view fileName) {}
+    void save() {
+        std::cout << "saving";
+        std::ofstream oFile{"books.txt"};
+        if (!oFile) {
+            std::cout << "unable to open file";
+            return;
+        }
+        for (maxSize i {0}; i<count; i++) {
+            book* current = {&books[i]};
+            if (current->id != 0) {
+            oFile << current->id << " " << current->name << " " << current->author << "; ";
+            }
+        }
+    }
 
     void printBooks() {
         for (size_t i {0}; i < capacity; i++) {
