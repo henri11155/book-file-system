@@ -2,8 +2,8 @@
 #define FILESYSTEM_H
 #include <iostream>
 #include <string>
-#include <random>
 #include <fstream>
+#include <cstdint>
 #include "filesystem.h"
 using maxSize = uint16_t;
 
@@ -97,25 +97,34 @@ class fileSystem {
     }
     //book search(uint16_t id) {}
     
-    void importFromFile(std::string_view fileName) {}
+    void importFromFile() {
+        std::ifstream iFile{"books.txt"};
+        if (!iFile) {
+            std::cout << "unable to open file";
+            return;
+        }
+
+    }
     void save() {
-        std::cout << "saving";
+
         std::ofstream oFile{"books.txt"};
         if (!oFile) {
             std::cout << "unable to open file";
             return;
         }
         for (maxSize i {0}; i<count; i++) {
-            book* current = {&books[i]};
+            book* current {&books[i]};
             if (current->id != 0) {
-            oFile << current->id << " " << current->name << " " << current->author << "; ";
+            oFile << current->id << " " << current->name << " " << current->author << "\n";
             }
         }
     }
 
     void printBooks() {
         for (size_t i {0}; i < capacity; i++) {
-            std::cout << books[i].id;
+            book* current {&books[i]};
+            if (current->id == 0) continue;
+            std::cout << "\n ID: " << current->id << "\nTitle: " << current->name << "\nAuthor: " << current->author << "\n";
         }
     }
     };
