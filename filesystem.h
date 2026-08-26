@@ -54,8 +54,41 @@ class fileSystem {
         if (count >= capacity || capacity == 0) {
             resize();
         }
+        //find spot to insert by comparing, this is so list can be ordered
+        if (capacity == 1 && count == 0) {
         books[count] = book;
         count++;
+        }
+        //binary search for book
+        {
+            size_t high {count-1};
+            size_t low {0};
+            size_t mid {count / 2};
+            int target {book.id};
+            while (true) {
+                if (books[mid].id == target) {
+                    shift(direction::backwards, mid+1);
+                    books[mid+1] = book;
+                    break;
+                }
+                else if (books[mid].id > target) {
+                    high = mid;
+                    mid -= (low-mid)/2;
+                }
+                else if (books[mid].id < target) {
+                    low = mid;
+                    mid += (high-mid)/2; 
+                } else if (low == mid) {
+                    shift(direction::backwards, mid+1);
+                    books[mid+1] = book;
+                    break;
+                }
+                    
+            }       
+        }
+
+
+
     }
     
     void remove(maxSize id) {} // shift after removal
