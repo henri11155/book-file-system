@@ -11,7 +11,7 @@ struct book {
     std::string name {};
     std::string author {};
     maxSize id {};
-    book() = default;
+    book() : name{" "}, author{" "}, id{0} {}
     book(std::string name, std::string author, maxSize id) : name{name}, author{author}, id{id} {}
     book& operator=(book& book) noexcept {
         name = book.name;
@@ -37,8 +37,14 @@ class fileSystem {
     maxSize capacity{};
     maxSize count{};
     public:
-    fileSystem(size_t count=8) : books{new book[capacity]}, capacity{static_cast<maxSize>(count)}, count{0} {}
-
+    enum direction {
+        backwards = 0,
+        forwards = 1
+    };
+    fileSystem(maxSize size=8) : books{new book[capacity]}, capacity{static_cast<maxSize>(size)}, count{0} {}
+    ~fileSystem() {
+        delete[] books;
+    }
     void resize() {
         std::cout << "resizing ";
         capacity = (capacity == 0 ? 1 : capacity * 2);
@@ -50,26 +56,41 @@ class fileSystem {
         books = newBooks;
     }
 
-    void add(book& book) {
+    bool add(book& book) {
         if (count >= capacity || capacity == 0) {
             resize();
         }
         //find spot to insert by comparing, this is so list can be ordered
-        if (capacity == 1 && count == 0) {
-        books[count] = book;
-        count++;
+        if (capacity == 1 || count == 0) {
+            books[0] = book;
+            std::cout << "\nAdded " << book.name << " ID: " << book.id;
+            count++;
+            return true;
+        }
+        if (books[count-1].id < book.id) {
+            books[count] = book;
+            count++;
+            std::cout << "\nAdded " << book.name << " ID: " << book.id;
+            return true;
         }
         //binary search for book
         {
-            size_t high {count-1};
-            size_t low {0};
-            size_t mid {count / 2};
+            maxSize high = count-1;
+            maxSize low {0};
+            maxSize mid = count / 2;
             int target {book.id};
+
             while (true) {
-                if (books[mid].id == target) {
+                if (low == mid || high == mid) { //if id not already in list
                     shift(direction::backwards, mid+1);
                     books[mid+1] = book;
-                    break;
+                    std::cout << "\nAdded " << book.name << " ID: " << book.id;
+                    count++;
+                    return true;
+                }
+                if (books[mid].id == target) {
+                    std::cout << "duplicate";
+                    return false;
                 }
                 else if (books[mid].id > target) {
                     high = mid;
@@ -78,10 +99,6 @@ class fileSystem {
                 else if (books[mid].id < target) {
                     low = mid;
                     mid += (high-mid)/2; 
-                } else if (low == mid) {
-                    shift(direction::backwards, mid+1);
-                    books[mid+1] = book;
-                    break;
                 }
                     
             }       
@@ -91,8 +108,11 @@ class fileSystem {
 
     }
     
-    void remove(maxSize id) {} // shift after removal
+    void remove(maxSize id) {
+
+    } // shift after removal
     
+
     void shift (bool forwards, size_t start) noexcept {
         size_t fast {};
         size_t slow {};
@@ -128,7 +148,27 @@ class fileSystem {
             
         }
     }
-    //book search(uint16_t id) {}
+    maxSize search(maxSize id) {
+        maxSize high = count-1;
+        maxSize low {0};
+        maxSize mid = count / 2;
+        int target {id};
+        while (true) {
+            if (books[mid].id == target) {
+                return mid;
+                break;
+            }
+            else if (books[mid].id > target) {
+                high = mid;
+                mid -= (low-mid)/2;
+            }
+            else if (books[mid].id < target) {
+                low = mid;
+                mid += (high-mid)/2; 
+            } 
+                    
+        }       
+    }
     
     void importFromFile() {
         std::ifstream iFile{"books.txt"};
