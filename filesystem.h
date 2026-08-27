@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <cmath>
 #include <cstdint>
 #include "filesystem.h"
 using maxSize = uint16_t;
@@ -57,6 +58,8 @@ class fileSystem {
     }
 
     bool add(book& book) {
+        //std::cout << "\nadding";
+
         if (count >= capacity || capacity == 0) {
             resize();
         }
@@ -70,7 +73,15 @@ class fileSystem {
         if (books[count-1].id < book.id) {
             books[count] = book;
             count++;
+            std::cout << "\nqAdded " << book.name << " ID: " << book.id;
+            return true;
+        }
+
+        if (count == 1) {
             std::cout << "\nAdded " << book.name << " ID: " << book.id;
+            books[1] = std::move(books[0]);
+            books[0] = book;
+            count++;
             return true;
         }
         //binary search for book
@@ -81,20 +92,27 @@ class fileSystem {
             int target {book.id};
 
             while (true) {
-                if (low == mid || high == mid) { //if id not already in list
-                    shift(direction::backwards, mid+1);
-                    books[mid+1] = book;
-                    std::cout << "\nAdded " << book.name << " ID: " << book.id;
-                    count++;
-                    return true;
-                }
                 if (books[mid].id == target) {
                     std::cout << "duplicate";
                     return false;
                 }
+                if (high == mid) { //if id not already in list
+                    shift(direction::backwards, mid);
+                    count++;
+                    books[mid] = book;
+                    std::cout << "\nAdded " << book.name << " ID: " << book.id;
+                    return true;
+                } else if (low == mid) {
+                    if (books[mid].id < book.id) {mid++;}
+                    shift(direction::backwards, mid);
+                    count++;
+                    books[mid] = book;
+                    std::cout << "\nAdded " << book.name << " ID: " << book.id;;
+                    return true;
+                }
                 else if (books[mid].id > target) {
                     high = mid;
-                    mid -= (low-mid)/2;
+                    mid -= (std::ceil((static_cast<double>(mid-low)))/2);
                 }
                 else if (books[mid].id < target) {
                     low = mid;
@@ -113,41 +131,50 @@ class fileSystem {
     } // shift after removal
     
 
-    void shift (bool forwards, size_t start) noexcept {
-        size_t fast {};
+    void shift (bool forwards, maxSize start) noexcept {
+        std::cout << "moving " << start;
+        int fast {};
         size_t slow {};
         if (forwards) {
             fast = start;
             slow = start;
             fast++;
             while (fast < capacity) {
-                if (!books[fast].id) {
+                if (books[fast].id == 0) {
                     fast++;
                     continue;
-                } else if (!books[slow].id) {
+                } else if (books[slow].id == 0) {
                     books[slow] = std::move(books[fast]);
+                    fast++;
                     slow++;
                     break;
                 }
-                fast++;
             }
         }
         else {
-            fast = count-2; //start from first and second last elements
-            slow = count-1;
+            fast = count-1; //start from first and second last elements
+            slow = count;
+            if (count == 1) {
+                books[1] = std::move(books[0]);
+                return;
+            }
             while (fast >= start) {
-                if (!books[fast].id) {
+                if (books[fast].id == 0) {
+                    fast--;
                     continue;
-                } else if (!books[slow].id) {
+                } else if (books[slow].id == 0) {
+                    std::cout << " moving " << fast << " " << slow;
                     books[slow] = std::move(books[fast]);
                     slow--;
-                    break;
+                    fast--;
                 }
-                fast--;
             }
-            
+        } 
+        //else {
+         //   books[2] = std::move(books[1]);
+         //   std::cout << "yhep js 2 here";
+        //}
         }
-    }
     maxSize search(maxSize id) {
         maxSize high = count-1;
         maxSize low {0};
@@ -196,7 +223,7 @@ class fileSystem {
     void printBooks() {
         for (size_t i {0}; i < capacity; i++) {
             book* current {&books[i]};
-            if (current->id == 0) continue;
+            //if (current->id == 0) continue;
             std::cout << "\n ID: " << current->id << "\nTitle: " << current->name << "\nAuthor: " << current->author << "\n";
         }
     }
