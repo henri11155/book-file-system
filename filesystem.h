@@ -58,12 +58,10 @@ class fileSystem {
     }
 
     bool add(book& book) {
-        //std::cout << "\nadding";
 
         if (count >= capacity || capacity == 0) {
             resize();
         }
-        //find spot to insert by comparing, this is so list can be ordered
         if (capacity == 1 || count == 0) {
             books[0] = book;
             std::cout << "\nAdded " << book.name << " ID: " << book.id;
@@ -132,7 +130,6 @@ class fileSystem {
     
 
     void shift (bool forwards, maxSize start) noexcept {
-        std::cout << "moving " << start;
         int fast {};
         size_t slow {};
         if (forwards) {
@@ -163,17 +160,14 @@ class fileSystem {
                     fast--;
                     continue;
                 } else if (books[slow].id == 0) {
-                    std::cout << " moving " << fast << " " << slow;
+                    
                     books[slow] = std::move(books[fast]);
                     slow--;
                     fast--;
                 }
             }
         } 
-        //else {
-         //   books[2] = std::move(books[1]);
-         //   std::cout << "yhep js 2 here";
-        //}
+
         }
     maxSize search(maxSize id) {
         maxSize high = count-1;
@@ -223,7 +217,7 @@ class fileSystem {
     void printBooks() {
         for (size_t i {0}; i < capacity; i++) {
             book* current {&books[i]};
-            //if (current->id == 0) continue;
+            if (current->id == 0) continue;
             std::cout << "\n ID: " << current->id << "\nTitle: " << current->name << "\nAuthor: " << current->author << "\n";
         }
     }
